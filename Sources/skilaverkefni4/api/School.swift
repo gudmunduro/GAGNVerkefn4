@@ -1,32 +1,20 @@
 import Dispatch
 import MySQL
 
-struct Student: Codable, QueryParameter {
+struct School: Codable, QueryParameter {
     
     let id: Int
-    var name: String{
-        didSet {
-            changeValue<String>(column: .name, value: name)
-        }
-    }
-    var credits: Int{
-        didSet {
-            changeValue<Int>(column: .credits, value: credits)
-        }
-    }
-    var trackID: Int{
-        didSet {
-            changeValue<Int>(column: .trackID, value: trackID)
-        }
-    }
-
+    var name: String
+    var credits: Int
+    var trackID: Int
+    
     static func create(id: Int, name: String, credits: Int, trackID: Int) -> Future<Student>
     {
         let studentPromise = Promise<Student>()
         ProgressTracker.defaultDB.connectionPool.whenReady { pool in
             do {
                 let student: Student = try pool.execute { conn in
-                    try conn.query("call CreateStudent(?, ?, ?, ?)", [id, name, credits, trackID])
+                    try conn.query("call CreateSchool(?, ?, ?, ?)", [id, name, credits, trackID])
                     }[0]
                 studentPromise.succeed(result: student)
             } catch {
@@ -35,15 +23,15 @@ struct Student: Codable, QueryParameter {
         }
         return studentPromise.futureResult
     }
-
+    
     static func find(id: Int) -> Future<Student>
     {
         let studentPromise = Promise<Student>()
-        ProgressTracker.defaultDB.connectionPool.whenReady { pool in 
+        ProgressTracker.defaultDB.connectionPool.whenReady { pool in
             do {
                 let student: Student = try pool.execute { conn in
-                    try conn.query("SELECT * FROM students where studentid = ?", [id]) 
-                }[0]
+                    try conn.query("SELECT * FROM students where studentid = ?", [id])
+                    }[0]
                 studentPromise.succeed(result: student)
             } catch {
                 studentPromise.fail(error: ProgressTrackerError.failedToLoadFromDB)
@@ -51,14 +39,14 @@ struct Student: Codable, QueryParameter {
         }
         return studentPromise.futureResult
     }
-
+    
     func delete() -> Future<Bool>
     {
         let changeResult = Promise<Bool>()
         ProgressTracker.defaultDB.connectionPool.whenReady { pool in
             do {
                 try pool.execute { conn in
-                    try conn.query("call DeleteStudent(?)", [self.id])
+                    try conn.query("call DeleteSchool(?)", [self.id])
                 }
                 changeResult.succeed(result: true)
             } catch {
@@ -73,8 +61,8 @@ struct Student: Codable, QueryParameter {
         let changeResult = Promise<Bool>()
         ProgressTracker.defaultDB.connectionPool.whenReady { pool in
             do {
-                 try pool.execute { conn in
-                    try conn.query("call UpdateStudent(?, ?, ?, ?)", [column.rawValue, value])
+                try pool.execute { conn in
+                    try conn.query("call UpdateSchool(?, ?)", [String(describing: column), value])
                     changeResult.succeed(result: true)
                 }
             } catch {

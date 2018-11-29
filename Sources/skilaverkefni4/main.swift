@@ -9,4 +9,13 @@ let student = Student.find(id: 50)
 
 student.whenReady { student in
     print(student.name)
+    let error = student.changeValues { student in
+        student.name = "Nýttnafn"
+        student.credits += 1
+    }
+    if error {
+        print("Failed to set name for student")
+    } else {
+        print("Values updated!")
+    }
 }
