@@ -1,90 +1,44 @@
-import Dispatch
 import MySQL
 
 struct Course: Codable, QueryParameter {
     
-    let id: Int
+    let number: String
     var name: String{
         didSet {
-            changeValue<String>(column: .name, value: name)
+            update(column: .name, value: name)
         }
     }
     var credits: Int{
         didSet {
-            changeValue<Int>(column: .credits, value: credits)
+            update(column: .credits, value: credits)
         }
     }
-    var trackID: Int
-    
-    static func create(id: Int, name: String, credits: Int, trackID: Int) -> Future<Student>
+
+    enum CodingKeys: String, CodingKey {
+        case number = "courseNumber"
+        case name = "courseName"
+        case credits = "courseCredits"
+    }
+
+    static func create(number: String, name: String, credits: Int) -> Future<Student>
     {
-        let studentPromise = Promise<Student>()
-        ProgressTracker.defaultDB.connectionPool.whenReady { pool in
-            do {
-                let student: Student = try pool.execute { conn in
-                    try conn.query("call CreateCourse(?, ?, ?, ?)", [id, name, credits, trackID])
-                    }[0]
-                studentPromise.succeed(result: student)
-            } catch {
-                studentPromise.fail(error: ProgressTrackerError.failedToLoadFromDB)
-            }
-        }
-        return studentPromise.futureResult
+        let student: Future<Student> = MySQLFuncs.createRow(functionName: "createCourse", parameters: [number, name, credits])
+        return student
     }
-    
-    static func find(id: Int) -> Future<Student>
+
+    static func find(number: String) -> Future<Student>
     {
-        let studentPromise = Promise<Student>()
-        ProgressTracker.defaultDB.connectionPool.whenReady { pool in
-            do {
-                let student: Student = try pool.execute { conn in
-                    try conn.query("SelectCourse(?)", [id])
-                    }[0]
-                studentPromise.succeed(result: student)
-            } catch {
-                studentPromise.fail(error: ProgressTrackerError.failedToLoadFromDB)
-            }
-        }
-        return studentPromise.futureResult
+        return MySQLFuncs.findRow(functionName: "selectCourse", id: number)
     }
-    
+
     func delete() -> Future<Bool>
     {
-        let changeResult = Promise<Bool>()
-        ProgressTracker.defaultDB.connectionPool.whenReady { pool in
-            do {
-                try pool.execute { conn in
-                    try conn.query("call DeleteCourse(?)", [self.id])
-                }
-                changeResult.succeed(result: true)
-            } catch {
-                changeResult.fail(result: ProgressTrackerError.failedToLoadFromDB)
-            }
-        }
-        return changeResult.futureResult
+        return MySQLFuncs.deleteRow(functionName: "deleteCourse", id: number)
     }
     
-    private func changeValue<T>(column: CodingKeys, value: T) -> Future<Bool>
+    func update(column: CodingKeys, value: QueryParameter) -> Future<Bool>
     {
-        let changeResult = Promise<Bool>()
-        ProgressTracker.defaultDB.connectionPool.whenReady { pool in
-            do {
-                try pool.execute { conn in
-                    try conn.query("call UpdateSchool(?, ?)", [String(describing: column), value])
-                    changeResult.succeed(result: true)
-                }
-            } catch {
-                changeResult.fail(error: ProgressTrackerError.failedToLoadFromDB)
-            }
-        }
-        return changeResult.futureValue
-    }
-    
-    private enum CodingKeys: String, CodingKey {
-        case id = "studentID"
-        case name = "studentName"
-        case credits
-        case trackID
+        return MySQLFuncs.changeValue(functionName: "changeCourseValue", valueToChange: String(describing: column), changeTo: value, id: number)
     }
 }
 

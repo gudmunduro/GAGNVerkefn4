@@ -5,17 +5,10 @@ let students: [Student] = try pool.execute { conn in
 }
 print(students[50].name)*/
 
-let student = Student.find(id: 50)
+var student: Future<Student> = Student.find(id: 50)
 
 student.whenReady { student in
     print(student.name)
-    let error = student.changeValues { student in
-        student.name = "Nýttnafn"
-        student.credits += 1
-    }
-    if error {
-        print("Failed to set name for student")
-    } else {
-        print("Values updated!")
-    }
+    student.update(column: .name, value: "Nýttnafn")
+    student.update(column: .credits, value: 1)
 }
