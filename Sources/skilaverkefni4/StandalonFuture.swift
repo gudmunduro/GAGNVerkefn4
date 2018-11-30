@@ -114,7 +114,7 @@ class Future<T> {
         }
     }
     
-    func whenReady(runFunc: @escaping (T) -> Void)
+    func whenReady(runFunc: @escaping (T?) -> Void)
     {
         if (ready)
         {
@@ -124,7 +124,7 @@ class Future<T> {
         DispatchQueue.global().async
         {
             self.wait()
-            runFunc(self.value!)
+            runFunc(self.value)
         }
     }
 
