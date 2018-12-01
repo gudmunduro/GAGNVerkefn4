@@ -6,19 +6,22 @@ let students: [Student] = try pool.execute { conn in
 print(students[50].name)*/
 
 struct ManangeStudents {
-    lazy let menu = {
-        return Menu([
-            "Display all": self.displayAll(),
-            "Delete student": self.delete(),
-            "Rename student": self.rename(),
-            "Add Student": self.add()
-        ])
+    let menu: Menu
+
+    init()
+    {
+        menu = Menu(header: "Manange students")
+        menu.options = [
+            "Display all": self.displayAll,
+            "Delete student": self.delete,
+            "Rename student": self.rename,
+            "Add Student": self.add 
+        ]
     }
 
     private func askForID() -> Int?
     {
-        print("ID of student: ", terminator: "")
-        return Int(readline())
+        return input("ID of student")
     }
 
     func displayAll()
@@ -38,7 +41,7 @@ struct ManangeStudents {
                 return
             }
             student.delete().whenReady { success in
-                if success {
+                if success! {
                     print("Student with id \(id) has been deleted")
                 } else {
                     print("Failed to delete student with id \(id)")
@@ -53,8 +56,10 @@ struct ManangeStudents {
             print("Error: Invalid id")
             return
         }
-        print("New name: ", terminator: "")
-        let name = readline()
+        guard let name: String = input("New name") else {
+            print("Invalid name")
+            return
+        }
 
         Student.find(id: id).whenReady{ studentn in
             guard let student = studentn else {
@@ -62,7 +67,7 @@ struct ManangeStudents {
                 return
             }
             student.update(column: .name, value: name).whenReady { success in
-                if success {
+                if success! {
                     print("Student with id \(id) has been renamed")
                 } else {
                     print("Failed to rename student with id \(id)")
@@ -73,31 +78,32 @@ struct ManangeStudents {
 
     func add()
     {
-        print("Name: ", terminator: "")
-        let name = readline()
-        print("Credits: ", terminator: "")
-        guard let credits = Int(readline()) else {
+        guard let name: String = input("Name"), name != "" else {
+            print("Invalid name")
+            return
+        }
+        guard let credits: Int = input("Credits") else {
             print("Invalid credits")
             return
         }
-        print("Track: ", terminator: "")
-        guard let trackid = Int(readline()) else {
+        guard let trackID: Int = input("Track") else {
             print("Invalid track")
             return
         }
-        Student.create(name: "Jón", credits: credits, track: trackid).whenReady { student in
+        Student.create(name: name, credits: credits, trackID: trackID).whenReady { student in
             if student != nil {
-                print("Student with id \(id) created")
+                print("Student created")
             } else {
-                print("Failed to create student with id \(id)")
+                print("Failed to create student")
             }
         }
     }
 }
 
-let menu = Menu("Select action", [
+let menu = Menu(header: "Select action", options: [
     "Manange students": {
-        ManangeStudents().menu.display()
+        let manangeStudents = ManangeStudents()
+        manangeStudents.menu.display()
     },
     "Manange schools": {
         print("Option not implemented")

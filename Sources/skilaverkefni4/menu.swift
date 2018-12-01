@@ -3,7 +3,19 @@
 class Menu {
 
     let header: String?
-    let options: [String: () -> Void]
+    var options: [String: () -> Void]
+
+    init()
+    {
+        self.header = nil
+        self.options = [:]
+    }
+
+    init(header: String?)
+    {
+        self.header = header
+        self.options = [:]
+    }
 
     init(options: [String: () -> Void])
     {
@@ -21,16 +33,16 @@ class Menu {
         if let header = self.header {
             print(header)
         }
-        for text, run in options {
+        for text in options {
             print(text)
         }
         while true {
             print("Select option: ", terminator: "")
-            guard let selected = Int(readLine()), 1..options.count ~= selected  else {
+            guard let selected = Int(readLine()!), 1...options.count ~= selected  else {
                 print("Selection is invalid or not in range")
                 continue
             }
-            options[options.keys[selected]]()
+            options[Array(options.keys)[selected]]!()
             break
         }
     }
