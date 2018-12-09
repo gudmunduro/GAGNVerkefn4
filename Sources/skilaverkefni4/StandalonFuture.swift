@@ -33,7 +33,7 @@ fileprivate class CallbackList<T>
 
     func run(value: T?) -> RunResult<T>
     {
-        if (isRunning) { return RunResult<T>(changed: false) }
+        if isRunning { return RunResult<T>(changed: false) }
         isRunning = true
         var newValue = value
         for i in self.current...self.callbacks.count {
@@ -109,7 +109,7 @@ class Future<T> {
 
     func wait()
     {
-        while (value == nil)
+        while value == nil
         {
             usleep(100000)
         }
@@ -117,7 +117,7 @@ class Future<T> {
     
     func whenReady(runFunc: @escaping (T?) -> Void)
     {
-        if (ready)
+        if ready
         {
             runFunc(self.value!)
             return
