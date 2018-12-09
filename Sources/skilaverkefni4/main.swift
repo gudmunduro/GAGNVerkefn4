@@ -15,7 +15,8 @@ struct ManangeStudents {
             "Display all": self.displayAll,
             "Delete student": self.delete,
             "Rename student": self.rename,
-            "Add Student": self.add 
+            "Add Student": self.add,
+            "Print all student names": self.printAll
         ]
     }
 
@@ -97,6 +98,21 @@ struct ManangeStudents {
                 print("Failed to create student")
             }
         }
+    }
+
+    func printAll()
+    {
+        print("Names of all students: ")
+        Student.all.whenReady {
+            guard let students = $0 else {
+                print("Failed to load students")
+                return
+            }
+            students.forEach { student in
+                print(student.name)
+            }
+        }
+        print("----------END----------")
     }
 }
 

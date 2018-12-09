@@ -14,6 +14,10 @@ struct School: Codable, QueryParameter {
         case name = "schoolName"
     }
 
+    static var all: Future<[School]> {
+        return MySQLFuncs.getAll(functionName: "getAllSchools")
+    }
+
     static func create(id: Int, name: String) -> Future<Student>
     {
         let student: Future<Student> = MySQLFuncs.createRow(functionName: "createSchool", parameters: [id, name])

@@ -76,6 +76,7 @@ class Future<T> {
     fileprivate var callbackList: CallbackList<T>
     fileprivate var initialValueReady: Bool {
         didSet {
+            if !initialValueReady { return }
             self.run()
         }
     }
@@ -84,7 +85,7 @@ class Future<T> {
     public fileprivate(set) var value: T?
     public fileprivate(set) var failure: Bool {
         didSet {
-            if failure == false { return }
+            if !failure { return }
             initialValueReady = true
             ready = true
             value = nil

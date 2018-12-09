@@ -50,6 +50,26 @@ final class MySQLFuncs {
         return rowPromise.futureResult
     }
 
+    static func getAll<T: Decodable>(functionName: String) -> Future<[T]>
+    {
+        let rowPromise = Promise<[T]>()
+        ProgressTracker.defaultDB.connectionPool.whenReady { connPool in
+            guard let pool = connPool else {
+                print("Error: Database error")
+                return
+            }
+            do {
+                let rows: [T] = try pool.execute { conn in
+                    try conn.query("call \(functionName)()") 
+                }
+                rowPromise.succeed(result: rows)
+            } catch {
+                rowPromise.fail(error: ProgressTrackerError.failedToLoadFromDB)
+            }
+        }
+        return rowPromise.futureResult
+    }
+
     static func deleteRow(functionName: String, id: QueryParameter) -> Future<Bool>
     {
         let changeResult = Promise<Bool>()
