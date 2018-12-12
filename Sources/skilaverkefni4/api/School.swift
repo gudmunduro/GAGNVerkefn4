@@ -18,9 +18,9 @@ struct School: Codable, QueryParameter {
         return MySQLFuncs.getAll(functionName: "getAllSchools")
     }
 
-    static func create(id: Int, name: String) -> Future<Student>
+    static func create(id: Int, name: String) -> Future<Bool>
     {
-        let student: Future<Student> = MySQLFuncs.createRow(functionName: "createSchool", parameters: [id, name])
+        let student: Future<Bool> = MySQLFuncs.createRow(functionName: "createSchool", parameters: [id, name])
         return student
     }
 

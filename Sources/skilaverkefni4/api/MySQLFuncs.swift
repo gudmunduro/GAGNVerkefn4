@@ -3,15 +3,16 @@ import MySQL
 
 final class MySQLFuncs {
 
-    static func createRow<T: Decodable>(functionName: String, parameters: [QueryParameter]) -> Future<T>
+    static func createRow(functionName: String, parameters: [QueryParameter]) -> Future<Bool>
     {
-        let rowPromise = Promise<T>()
+        let rowPromise = Promise<Bool>()
 
         var sqlStringParams = "("
-        for i in 0...parameters.count {
+        for i in 0...parameters.count - 1 {
             sqlStringParams += (i == parameters.count - 1) ? "?" : "?, "
         }
-        sqlStringParams = ")" // Býr til (?, ?, ?...)
+        sqlStringParams += ")" // Býr til (?, ?, ?...)
+        print(sqlStringParams)
 
         ProgressTracker.defaultDB.connectionPool.whenReady { connPool in
             guard let pool = connPool else {
@@ -19,10 +20,10 @@ final class MySQLFuncs {
                 return
             }
             do {
-                let row: T = try pool.execute { conn in
+                let status = try pool.execute { conn in
                     try conn.query("call \(functionName)\(sqlStringParams)", parameters)
-                    }[0]
-                rowPromise.succeed(result: row)
+                    }
+                rowPromise.succeed(result: status.affectedRows == 1)
             } catch {
                 rowPromise.fail(error: ProgressTrackerError.failedToLoadFromDB)
             }

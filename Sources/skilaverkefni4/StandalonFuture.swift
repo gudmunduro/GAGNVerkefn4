@@ -33,7 +33,7 @@ fileprivate class CallbackList<T>
 
     func run(value: T?) -> RunResult<T>
     {
-        if isRunning { return RunResult<T>(changed: false) }
+        if isRunning || self.callbacks.count == 0 { return RunResult<T>(changed: false) }
         isRunning = true
         var newValue = value
         for i in self.current...self.callbacks.count {
@@ -119,7 +119,7 @@ class Future<T> {
     {
         if ready
         {
-            runFunc(self.value!)
+            runFunc(self.value)
             return
         }
         DispatchQueue.global().async

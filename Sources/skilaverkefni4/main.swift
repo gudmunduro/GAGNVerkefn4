@@ -12,7 +12,6 @@ struct ManangeStudents {
     {
         menu = Menu(header: "Manange students")
         menu.options = [
-            "Display all": self.displayAll,
             "Delete student": self.delete,
             "Rename student": self.rename,
             "Add Student": self.add,
@@ -23,11 +22,6 @@ struct ManangeStudents {
     private func askForID() -> Int?
     {
         return input("ID of student")
-    }
-
-    func displayAll()
-    {
-
     }
 
     func delete()
@@ -91,8 +85,8 @@ struct ManangeStudents {
             print("Invalid track")
             return
         }
-        Student.create(name: name, credits: credits, trackID: trackID).whenReady { student in
-            if student != nil {
+        Student.create(name: name, credits: credits, trackID: trackID).whenReady { success in
+            if let s = success, s {
                 print("Student created")
             } else {
                 print("Failed to create student")
@@ -104,6 +98,7 @@ struct ManangeStudents {
     {
         print("Names of all students: ")
         Student.all.whenReady {
+            print("inside!")
             guard let students = $0 else {
                 print("Failed to load students")
                 return
@@ -116,6 +111,8 @@ struct ManangeStudents {
     }
 }
 
+var running = true
+
 let menu = Menu(header: "Select action", options: [
     "Manange students": {
         let manangeStudents = ManangeStudents()
@@ -126,6 +123,12 @@ let menu = Menu(header: "Select action", options: [
     },
     "Manange courses": {
         print("Option not implemented")
+    },
+    "Exit": {
+        running = false
     }
 ])
-menu.display()
+while running
+{
+    menu.display()
+}

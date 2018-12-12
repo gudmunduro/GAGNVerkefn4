@@ -33,8 +33,10 @@ class Menu {
         if let header = self.header {
             print(header)
         }
-        for text in options {
-            print(text)
+        var optionCounter = 1;
+        for option in options {
+            print(String(optionCounter) + ": " + option.key)
+            optionCounter += 1;
         }
         while true {
             print("Select option: ", terminator: "")
@@ -42,7 +44,7 @@ class Menu {
                 print("Selection is invalid or not in range")
                 continue
             }
-            options[Array(options.keys)[selected]]!()
+            options[Array(options.keys)[selected - 1]]!()
             break
         }
     }
